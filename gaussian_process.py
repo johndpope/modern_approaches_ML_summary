@@ -52,6 +52,7 @@ kernels = {'cnt': C(constant_value=0.1),
            'whi': WK(noise_level=0.01)}
            
 k = kernels['cnt'] + kernels['ex2'] + kernels['rbf'] 
+if 'gp' in locals(): del gp
 gp = GP(kernel=k, n_restarts_optimizer=9, normalize_y=True)
 
 
@@ -64,7 +65,6 @@ trainY = train_windows.values[:,-1]
 testX = test_windows.values[:,:-1]
 testY = test_windows.values[:,-1]
 
-if 'gp' in locals(): del gp_inc
 t0 = time.time()
 gp.fit(train_windows.values[:,:-1], train_windows.values[:,-1])
 tF = time.time()
