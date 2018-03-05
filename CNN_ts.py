@@ -21,7 +21,7 @@ from beautifultable import BeautifulTable as BT
 # Keras Implementation
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
-from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.layers.convolutional import Conv2D, MaxPooling2D, AveragePooling2D
 
 ##############################################################################
 # IMPORT DATA AND WINDOWS
@@ -53,7 +53,6 @@ train_tensor_y_inc = train_PictureCreator_y_inc.collect_pictures()
 test_PictureCreator_y_inc = ts.WindowsToPictures(window, cnn_testset.iloc[:,1:])
 test_tensor_y_inc = test_PictureCreator_y_inc.collect_pictures()
 
-
 #np.save('tensors', preds_tensor)
 #preds_tensor = np.load('tensors.npy')
     
@@ -75,24 +74,32 @@ if 'model' in locals(): del model
 if 'history' in locals(): del history
 
 model = Sequential()
-model.add(Conv2D(filters = 1, 
+model.add(Conv2D(filters = 32, 
                  input_shape = inputs_shape,
                  data_format = 'channels_last',
                  kernel_size=(2,2), 
                  strides=(1,1),   
                  activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 1)))
+#model.add(MaxPooling2D(pool_size=(2, 1)))
+model.add(AveragePooling2D(pool_size=(2,1)))
+model.add(Dropout(0.2))
+model.add(Conv2D(filters = 12, 
+                 data_format = 'channels_last',
+                 kernel_size=(2,2), 
+                 strides=(1,1),   
+                 activation='relu'))
+#model.add(MaxPooling2D(pool_size=(2, 1)))
 model.add(Dropout(0.1))
 model.add(Flatten())
 model.add(Dropout(0.2))
-model.add(Dense(15, activation='relu'))
+model.add(Dense(45, activation='relu'))
 model.add(Dense(1))
 
 model.compile(optimizer='adam', loss='mean_squared_error')
 model.summary()
 
 ##############################################################################
-# TRAIN THE NETWORK AND PREDICT - With previous y
+# TRAIN THE NETWORK AND PREDICT - Without previous y
 ##############################################################################
 X_train = cp.deepcopy(trainset)
 y_train = cnn_trainset.iloc[w:,-1].values.reshape(-1,1)
@@ -108,12 +115,12 @@ table.append_row(['TestY',  y_test.shape[0], 1, '~', '~'])
 print(table)
 
 history = model.fit(X_train, y_train, validation_data=(X_test, y_test), 
-          epochs=60, batch_size=4, verbose=1)
+          epochs=60, batch_size=4, verbose=0)
 
 # Plot history of training
 plt.figure()
 plt.title('Evolution of the Error in Train and Test sets during training', 
-          fontsize=20)
+          fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='test')
 plt.legend()
@@ -127,7 +134,7 @@ print('RMSE = %.2f' % cnn_rmse)
 
 
 ##############################################################################
-# CREATION OF THE MODEL - Without Previous y
+# CREATION OF THE MODEL - With Previous y
 ##############################################################################        
 ''' KERAS IMPLEMENTATION'''
 trainset_y_inc = cp.deepcopy(train_tensor_y_inc)
@@ -145,13 +152,21 @@ if 'model' in locals(): del model
 if 'history' in locals(): del history
 
 model = Sequential()
-model.add(Conv2D(filters = 1, 
+model.add(Conv2D(filters = 32, 
                  input_shape = inputs_shape,
                  data_format = 'channels_last',
                  kernel_size=(2,2), 
                  strides=(1,1),   
                  activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 1)))
+model.add(AveragePooling2D(pool_size=(2,1)))
+#model.add(MaxPooling2D(pool_size=(2, 1)))
+model.add(Dropout(0.2))
+model.add(Conv2D(filters = 32, 
+                 input_shape = inputs_shape,
+                 data_format = 'channels_last',
+                 kernel_size=(2,2), 
+                 strides=(1,1),   
+                 activation='relu'))
 model.add(Dropout(0.1))
 model.add(Flatten())
 model.add(Dropout(0.2))
@@ -178,11 +193,11 @@ table.append_row(['TestY', y_test_y_inc.shape[0], 1, '~', '~'])
 print(table)
 
 history = model.fit(X_train_y_inc, y_train_y_inc, validation_data=(X_test_y_inc, y_test_y_inc), 
-          epochs=60, batch_size=4, verbose=1)
+          epochs=60, batch_size=4, verbose=0)
 
 
 # Plot history of training
-plt.figure()
+plt.figure(figsize=(20,6))
 plt.title('Evolution of the Error in Train and Test sets during training', 
           fontsize=20)
 plt.plot(history.history['loss'], label='train')
@@ -199,7 +214,7 @@ print('RMSE = %.2f' % cnn_rmse_y_inc)
 
 # Plot responses
 f, (ax1, ax2) = plt.subplots(2, figsize=(20,12))
-plt.suptitle('Actual vs Predicted - Symbolic Regression' , fontsize=20)
+plt.suptitle('Actual vs Predicted - CNN' , fontsize=20)
 ax1.set_title('RMSE without previous Y = %.2f' % cnn_rmse, fontsize = 18)
 ax1.grid(color='green', linewidth=0.5, alpha=0.5)
 
