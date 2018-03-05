@@ -94,6 +94,10 @@ plt.grid(color='green', linewidth=0.5, alpha=0.5)
 plt.scatter(testset.index, testset.y, color='black', s=10)
 plt.plot(testset.index, testset.y, color='b', label='Real Test')
 plt.plot(testset.index[w:], gp_y_pred, color='r', label='Predicted Test')
+plt.fill_between(testset.index[w:], 
+                 gp_y_lw[len(train_windows):], 
+                 gp_y_up[len(train_windows):], 
+                 color='blue', alpha=0.1, label='95% Interval Confidence')
 
 ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
 ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
