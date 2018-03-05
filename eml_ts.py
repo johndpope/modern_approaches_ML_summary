@@ -23,8 +23,8 @@ np.random.seed(2018)
 path_to_data = './windows_ts.h5'
 
 dataset = pd.read_hdf(path_to_data, 'dataset')
-eml_trainset = pd.read_hdf(path_to_data, 'trainset')
-eml_testset = pd.read_hdf(path_to_data, 'testset')
+trainset = pd.read_hdf(path_to_data, 'trainset')
+testset = pd.read_hdf(path_to_data, 'testset')
 
 train_windows = pd.read_hdf(path_to_data, 'train_windows')
 test_windows = pd.read_hdf(path_to_data, 'test_windows')
@@ -119,24 +119,56 @@ eml_residuals = NN.train(x = train_windows.iloc[:,:-1],
                      y = train_windows.iloc[:,-1].values.reshape(-1,1))
 tF = time.time()
 
-# U,S,V = NN.svd(NN.H)
+eml_fit = NN.predict(train_windows.iloc[:,:-1])
+eml_pred = NN.predict(test_windows.iloc[:,:-1])
 
-
-fit = NN.predict(train_windows.iloc[:,:-1])
-predictions = NN.predict(test_windows.iloc[:,:-1])
-
-'''
-eml_fit = scaler.inverse_transform(fit)
-eml_pred = scaler.inverse_transform(predictions)
-'''
-
-eml_fit = cp.deepcopy(fit)
-eml_pred = cp.deepcopy(predictions)
-
-eml_residuals = eml_pred - eml_testset.iloc[w:, -1].values.reshape(-1,1)
+eml_residuals = eml_pred - testset.iloc[w:, -1].values.reshape(-1,1)
 eml_rmse = np.sqrt(np.sum(np.power(eml_residuals,2)) / len(eml_residuals))
 print('RMSE = %.2f' % eml_rmse)
 print('Time to train %.2f' % (tF - t0))
+
+
+eml_y_fit = eml_fit # We did't scale
+eml_y_pred = eml_pred
+
+
+# Plot predictions
+f, ax = plt.subplots(1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Extreme Learning Machine' , fontsize=20)
+plt.title('RMSE = %.2f' % eml_rmse, fontsize = 18)
+plt.grid(color='green', linewidth=0.5, alpha=0.5)
+
+plt.scatter(testset.index, testset.y, color='black', s=10)
+plt.plot(testset.index, testset.y, color='b', label='Real Test')
+plt.plot(testset.index[w:], eml_y_pred, color='r', label='Predicted Test')
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+plt.xlabel('Time')
+plt.ylabel('Response')
+plt.legend()
+plt.show()
+
+
+# Complete Plot
+f, (ax1, ax2) = plt.subplots(2,1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Extreme Learning Machine' , fontsize=20)
+ax1.grid(color='green', linewidth=0.5, alpha=0.5)
+ax2.grid(color='green', linewidth=0.5, alpha=0.5)
+
+ax1.plot(trainset.index[w:], train_windows['y'], color='b', label='Real Train')
+ax1.plot(trainset.index[w:], eml_y_fit, color='r',
+         linewidth=0.8, alpha=0.8, label='Predicted Train')
+ax1.legend()
+ax1.set_title('Trainset')
+
+ax2.plot(testset.index[w:], test_windows['y'], color='b', label='Real Test')
+ax2.plot(testset.index[w:], eml_y_pred, color='r', label='Predicted Test')
+ax2.set_title('Testset - RMSE = %2.f' % eml_rmse)
+ax2.legend()
+
+plt.show()  
+
 
 
 ##############################################################################
@@ -149,26 +181,62 @@ eml_residuals = NN.train(x = train_windows_eml_inc.iloc[:,:-1],
                      y = train_windows_eml_inc.iloc[:,-1].values.reshape(-1,1))
 tF = time.time()
 
-# U,S,V = NN.svd(NN.H)
 
+eml_fit_inc = NN.predict(train_windows_eml_inc.iloc[:,:-1])
+eml_pred_inc = NN.predict(test_windows_eml_inc.iloc[:,:-1])
 
-fit_inc = NN.predict(train_windows_eml_inc.iloc[:,:-1])
-predictions_inc = NN.predict(test_windows_eml_inc.iloc[:,:-1])
-
-'''
-eml_fit = scaler.inverse_transform(fit)
-eml_pred = scaler.inverse_transform(predictions)
-'''
-
-eml_fit_inc = cp.deepcopy(fit_inc)
-eml_pred_inc = cp.deepcopy(predictions_inc)
-
-eml_residuals_inc = eml_pred_inc - eml_testset.iloc[w:, -1].values.reshape(-1,1)
+eml_residuals_inc = eml_pred_inc - testset.iloc[w:, -1].values.reshape(-1,1)
 eml_rmse_inc = np.sqrt(np.sum(np.power(eml_residuals_inc,2)) / len(eml_residuals_inc))
 print('RMSE = %.2f' % eml_rmse_inc)
 print('Time to train %.2f' % (tF - t0))
 
 
+eml_y_fit_inc = eml_fit_inc
+eml_y_pred_inc = eml_pred_inc
+
+
+# Plot predictions
+f, ax = plt.subplots(1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Extreme Learning Machine' , fontsize=20)
+plt.title('RMSE = %.2f' % eml_rmse, fontsize = 18)
+plt.grid(color='green', linewidth=0.5, alpha=0.5)
+
+plt.scatter(testset.index, testset.y, color='black', s=10)
+plt.plot(testset.index, testset.y, color='b', label='Real Test')
+plt.plot(testset.index[w:], eml_y_pred_inc, color='r', label='Predicted Test')
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+plt.xlabel('Time')
+plt.ylabel('Response')
+plt.legend()
+plt.show()
+
+
+# Complete Plot
+f, (ax1, ax2) = plt.subplots(2,1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Extreme Learning Machine' , fontsize=20)
+ax1.grid(color='green', linewidth=0.5, alpha=0.5)
+ax2.grid(color='green', linewidth=0.5, alpha=0.5)
+
+ax1.plot(trainset.index[w:], train_windows['y'], color='b', label='Real Train')
+ax1.plot(trainset.index[w:], eml_y_fit_inc, color='r',
+         linewidth=0.8, alpha=0.8, label='Predicted Train')
+ax1.legend()
+ax1.set_title('Trainset')
+
+ax2.plot(testset.index[w:], test_windows['y'], color='b', label='Real Test')
+ax2.plot(testset.index[w:], eml_y_pred_inc, color='r', label='Predicted Test')
+ax2.set_title('Testset - RMSE = %2.f' % eml_rmse)
+ax2.legend()
+
+plt.show()  
+
+
+
+##############################################################################
+# COMPARISON
+##############################################################################
 
 # Plot Predictions
 f, ax = plt.subplots(1, figsize=(20,12))
@@ -177,10 +245,10 @@ plt.title('RMSE without previous Y = %.2f \n RMSE with previous Y = %.2f'
           % (eml_rmse, eml_rmse_inc), fontsize = 18)
 plt.grid(color='green', linewidth=0.5, alpha=0.5)
 
-plt.scatter(eml_testset.index, eml_testset.y, color='black', s=10)
-plt.plot(eml_testset.index, eml_testset.y, color='b', label='Real Test')
-plt.plot(eml_testset.index[w:], eml_pred, color='r', label='Predicted Test')
-plt.plot(eml_testset.index[w:], eml_pred_inc, 
+plt.scatter(testset.index, testset.y, color='black', s=10)
+plt.plot(testset.index, testset.y, color='b', label='Real Test')
+plt.plot(testset.index[w:], eml_y_pred, color='r', label='Predicted Test')
+plt.plot(testset.index[w:], eml_y_pred_inc, 
          color='m', linewidth=0.4, label='Predicted Test prev Y included')
 
 ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
