@@ -21,18 +21,20 @@ np.random.seed(2018)
 # Data Creation
 ##############################################################################
 
-t = np.arange(0, 200, 1).reshape(-1,1)
+N = 600
+
+t = np.arange(0, N, 1).reshape(-1,1)
 t = np.array([t[i] + np.random.rand(1)/4 for i in range(len(t))])
 t = np.array([t[i] - np.random.rand(1)/7 for i in range(len(t))])
 t = np.array(np.round(t, 2))
 
-x1 = np.round((np.random.random(200) * 5).reshape(-1,1), 2)
-x2 = np.round((np.random.random(200) * 5).reshape(-1,1), 2)
-x3 = np.round((np.random.random(200) * 5).reshape(-1,1), 2)
+x1 = np.round((np.random.random(N) * 5).reshape(-1,1), 2)
+x2 = np.round((np.random.random(N) * 5).reshape(-1,1), 2)
+x3 = np.round((np.random.random(N) * 5).reshape(-1,1), 2)
 
-n = np.round((np.random.random(200) * 2).reshape(-1,1), 2)
+n = np.round((np.random.random(N) * 2).reshape(-1,1), 2)
 
-y = np.array([((x1[t] - x2[t-1]**2) + 0.02*x3[t-3]*np.exp(x1[t-1])) for t in range(len(t))])
+y = np.array([((np.log(np.abs(2 + x1[t])) - x2[t-1]**2) + 0.02*x3[t-3]*np.exp(x1[t-1])) for t in range(len(t))])
 y = np.round(y+n, 2)
 
 plt.figure(figsize=(20,6))
@@ -63,6 +65,8 @@ testset = dataset.iloc[dataset.index >= limit]
 ##############################################################################
 # Creation of the Windows
 ##############################################################################
+w = 5
+
 train_constructor = WindowSlider()
 train_windows = train_constructor.collect_windows(trainset.iloc[:,1:], 
                                                   previous_y=False)
@@ -114,7 +118,6 @@ train_windows = pd.DataFrame(window_scaler.fit_transform(train_windows),
 
 test_windows = pd.DataFrame(window_scaler.transform(test_windows),
                             columns = test_windows.columns)
-
 '''
     
 ##############################################################################
@@ -137,24 +140,21 @@ print('Time to train = %.2f seconds' % (tF - t0))
 
 
 # Plot Predictions
-def plot_bl():
-    f, ax = plt.subplots(1, figsize=(20,6))
-    plt.suptitle('Actual vs Predicted - Baseline Model' , fontsize=20)
-    plt.title('RMSE = %.2f' % bl_rmse, fontsize = 18)
-    plt.grid(color='green', linewidth=0.5, alpha=0.5)
-    
-    plt.scatter(bl_testset.index, bl_y, color='black', s=10)
-    plt.plot(bl_testset.index, bl_y, color='b', label='Real Test')
-    plt.plot(bl_testset.index, bl_y_pred, color='r', label='Predicted Test')
-    
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
-    ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
-    plt.xlabel('Time')
-    plt.ylabel('Response')
-    plt.legend()
-    plt.show()
+f, ax = plt.subplots(1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Baseline Model' , fontsize=20)
+plt.title('RMSE = %.2f' % bl_rmse, fontsize = 18)
+plt.grid(color='green', linewidth=0.5, alpha=0.5)
 
-plot_bl()
+plt.scatter(bl_testset.index, bl_y, color='black', s=10)
+plt.plot(bl_testset.index, bl_y, color='b', label='Real Test')
+plt.plot(bl_testset.index, bl_y_pred, color='r', label='Predicted Test')
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+plt.xlabel('Time')
+plt.ylabel('Response')
+plt.legend()
+plt.show()
 
 # Complete Plot
 f, (ax1, ax2) = plt.subplots(2,1, figsize=(20,6))
@@ -194,24 +194,22 @@ print('Time to train = %.2f seconds' % (tF - t0))
 
 
 # Plot Predictions
-def plot_lr():
-    f, ax = plt.subplots(1, figsize=(20,6))
-    plt.suptitle('Actual vs Predicted - Baseline Model' , fontsize=20)
-    plt.title('RMSE = %.2f' % lr_rmse, fontsize = 18)
-    plt.grid(color='green', linewidth=0.5, alpha=0.5)
-    
-    plt.scatter(testset.index, lr_y, color='black', s=10)
-    plt.plot(testset.index, lr_y, color='b', label='Real Test')
-    plt.plot(testset.index, lr_y_pred, color='r', label='Predicted Test')
-    
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
-    ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
-    plt.xlabel('Time')
-    plt.ylabel('Response')
-    plt.legend()
-    plt.show()
+f, ax = plt.subplots(1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Baseline Model' , fontsize=20)
+plt.title('RMSE = %.2f' % lr_rmse, fontsize = 18)
+plt.grid(color='green', linewidth=0.5, alpha=0.5)
 
-plot_lr()
+plt.scatter(testset.index, lr_y, color='black', s=10)
+plt.plot(testset.index, lr_y, color='b', label='Real Test')
+plt.plot(testset.index, lr_y_pred, color='r', label='Predicted Test')
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+plt.xlabel('Time')
+plt.ylabel('Response')
+plt.legend()
+plt.show()
+
 
 # Complete Plot
 f, (ax1, ax2) = plt.subplots(2,1, figsize=(20,6))
@@ -230,3 +228,113 @@ ax2.set_title('Testset - RMSE = %2.f' % lr_rmse)
 ax2.legend()
 
 plt.show()    
+
+
+
+# ___________ MULTIPLE LINEAR REGRESSION ON WINDOWS ___________ # RMSE = 8.61
+from sklearn.linear_model import LinearRegression
+lr_model = LinearRegression()
+lr_model.fit(train_windows.iloc[:,:-1], train_windows.iloc[:,-1])
+
+t0 = time.time()
+lr_y = test_windows['y'].values
+lr_y_fit = lr_model.predict(train_windows.iloc[:,:-1])
+lr_y_pred = lr_model.predict(test_windows.iloc[:,:-1])
+tF = time.time()
+
+lr_residuals = lr_y_pred - lr_y
+lr_rmse = np.sqrt(np.sum(np.power(lr_residuals,2)) / len(lr_residuals))
+print('RMSE = %.2f' % lr_rmse)
+print('Time to train = %.2f seconds' % (tF - t0))
+
+
+# Plot Predictions
+f, ax = plt.subplots(1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Multiple Linear Regression' , fontsize=20)
+plt.title('RMSE = %.2f' % lr_rmse, fontsize = 18)
+plt.grid(color='green', linewidth=0.5, alpha=0.5)
+
+plt.scatter(testset.index[w:], lr_y, color='black', s=10)
+plt.plot(testset.index[w:], lr_y, color='b', label='Real Test')
+plt.plot(testset.index[w:], lr_y_pred, color='r', label='Predicted Test')
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+plt.xlabel('Time')
+plt.ylabel('Response')
+plt.legend()
+plt.show()
+
+
+# Complete Plot
+f, (ax1, ax2) = plt.subplots(2,1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - Multiple Linear Regression' , fontsize=20)
+ax1.grid(color='green', linewidth=0.5, alpha=0.5)
+ax2.grid(color='green', linewidth=0.5, alpha=0.5)
+
+ax1.plot(trainset.index[w:], train_windows['y'], color='b', label='Real Train')
+ax1.plot(trainset.index[w:], lr_y_fit, color='r', label='Predicted Train')
+ax1.legend()
+ax1.set_title('Trainset')
+
+ax2.plot(testset.index[w:], lr_y, color='b', label='Real Test')
+ax2.plot(testset.index[w:], lr_y_pred, color='r', label='Predicted Test')
+ax2.set_title('Testset - RMSE = %2.f' % lr_rmse)
+ax2.legend()
+
+plt.show()     
+
+
+
+# ________ MULTIPLE LINEAR REGRESSION ON WINDOWS Y_INC ________ # RMSE = 8.61
+from sklearn.linear_model import LinearRegression
+lr_model = LinearRegression()
+lr_model.fit(train_windows_y_inc.iloc[:,:-1], train_windows_y_inc.iloc[:,-1])
+
+t0 = time.time()
+lr_y = test_windows['y'].values
+lr_y_fit = lr_model.predict(train_windows_y_inc.iloc[:,:-1])
+lr_y_pred = lr_model.predict(test_windows_y_inc.iloc[:,:-1])
+tF = time.time()
+
+lr_residuals = lr_y_pred - lr_y
+lr_rmse = np.sqrt(np.sum(np.power(lr_residuals,2)) / len(lr_residuals))
+print('RMSE = %.2f' % lr_rmse)
+print('Time to train = %.2f seconds' % (tF - t0))
+
+
+# Plot Predictions
+f, ax = plt.subplots(1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - MLR with previous t values' , fontsize=20)
+plt.title('RMSE = %.2f' % lr_rmse, fontsize = 18)
+plt.grid(color='green', linewidth=0.5, alpha=0.5)
+
+plt.scatter(testset.index[w:], lr_y, color='black', s=10)
+plt.plot(testset.index[w:], lr_y, color='b', label='Real Test')
+plt.plot(testset.index[w:], lr_y_pred, color='r', label='Predicted Test')
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+plt.xlabel('Time')
+plt.ylabel('Response')
+plt.legend()
+plt.show()
+
+
+# Complete Plot
+f, (ax1, ax2) = plt.subplots(2,1, figsize=(20,6))
+plt.suptitle('Actual vs Predicted - MLR with previous y values' , fontsize=20)
+ax1.grid(color='green', linewidth=0.5, alpha=0.5)
+ax2.grid(color='green', linewidth=0.5, alpha=0.5)
+
+ax1.plot(trainset.index[w:], train_windows['y'], color='b', label='Real Train')
+ax1.plot(trainset.index[w:], lr_y_fit, color='r', label='Predicted Train')
+ax1.legend()
+ax1.set_title('Trainset')
+
+ax2.plot(testset.index[w:], lr_y, color='b', label='Real Test')
+ax2.plot(testset.index[w:], lr_y_pred, color='r', label='Predicted Test')
+ax2.set_title('Testset - RMSE = %2.f' % lr_rmse)
+ax2.legend()
+
+plt.show()       

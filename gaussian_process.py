@@ -119,45 +119,42 @@ print('Time to train %.2f' % (tF - t0))
 
 
 # Plot Predictions
-def plot_sr():
-    f, (ax1, ax2) = plt.subplots(2, figsize=(20,12))
-    plt.suptitle('Actual vs Predicted - Symbolic Regression' , fontsize=20)
-    ax1.set_title('RMSE without previous Y = %.2f' % gp_rmse, fontsize = 18)
-    ax1.grid(color='green', linewidth=0.5, alpha=0.5)
-    
-    ax1.scatter(gp_testset.index, gp_testset.y, color='black', s=10)
-    ax1.plot(gp_testset.index, gp_testset.y, linewidth=2, color='b', label='Real Test')
-    ax1.plot(gp_testset.index[w:], gp_y_pred[len(train_windows):], 
-             color='r', label='Predicted Test')
-    ax1.fill_between(gp_testset.index[w:], 
-                     gp_y_lw[len(train_windows):], 
-                     gp_y_up[len(train_windows):], 
-                     color='blue', alpha=0.1, label='95% Interval Confidence')
-    
-    ax2.set_title('RMSE with previous Y = %.2f' % gp_rmse_inc, fontsize = 18)
-    ax2.grid(color='green', linewidth=0.5, alpha=0.5)
-    
-    ax2.scatter(gp_testset.index, gp_testset.y, color='black', s=10)
-    ax2.plot(gp_testset.index, gp_testset.y, 
-             linewidth=2, color='b', label='Real Test')
-    ax2.plot(gp_testset.index[w:], gp_y_pred_inc[len(train_windows):], 
-             color='r', label='Predicted Test prev Y included')
-    ax2.fill_between(gp_testset.index[w:], 
-                     gp_y_lw_inc[len(train_windows):], 
-                     gp_y_up_inc[len(train_windows):], 
-                     color='blue', alpha=0.1, label='95% Interval Confidence')
-    
-    ax1.yaxis.set_major_locator(ticker.MultipleLocator(5))
-    ax1.yaxis.set_minor_locator(ticker.MultipleLocator(1))
-    ax2.yaxis.set_major_locator(ticker.MultipleLocator(5))
-    ax2.yaxis.set_minor_locator(ticker.MultipleLocator(1))
-    ax1.legend()
-    ax2.legend()
-    plt.xlabel('Time')
-    plt.ylabel('gp_response')
-    plt.show()
+f, (ax1, ax2) = plt.subplots(2, figsize=(20,12))
+plt.suptitle('Actual vs Predicted - Symbolic Regression' , fontsize=20)
+ax1.set_title('RMSE without previous Y = %.2f' % gp_rmse, fontsize = 18)
+ax1.grid(color='green', linewidth=0.5, alpha=0.5)
 
-plot_sr()
+ax1.scatter(gp_testset.index, gp_testset.y, color='black', s=10)
+ax1.plot(gp_testset.index, gp_testset.y, linewidth=2, color='b', label='Real Test')
+ax1.plot(gp_testset.index[w:], gp_y_pred[len(train_windows):], 
+         color='r', label='Predicted Test')
+ax1.fill_between(gp_testset.index[w:], 
+                 gp_y_lw[len(train_windows):], 
+                 gp_y_up[len(train_windows):], 
+                 color='blue', alpha=0.1, label='95% Interval Confidence')
+
+ax2.set_title('RMSE with previous Y = %.2f' % gp_rmse_inc, fontsize = 18)
+ax2.grid(color='green', linewidth=0.5, alpha=0.5)
+
+ax2.scatter(gp_testset.index, gp_testset.y, color='black', s=10)
+ax2.plot(gp_testset.index, gp_testset.y, 
+         linewidth=2, color='b', label='Real Test')
+ax2.plot(gp_testset.index[w:], gp_y_pred_inc[len(train_windows):], 
+         color='r', label='Predicted Test prev Y included')
+ax2.fill_between(gp_testset.index[w:], 
+                 gp_y_lw_inc[len(train_windows):], 
+                 gp_y_up_inc[len(train_windows):], 
+                 color='blue', alpha=0.1, label='95% Interval Confidence')
+
+ax1.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax1.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+ax2.yaxis.set_major_locator(ticker.MultipleLocator(5))
+ax2.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+ax1.legend()
+ax2.legend()
+plt.xlabel('Time')
+plt.ylabel('gp_response')
+plt.show()
 
 
 # Complete Plot
